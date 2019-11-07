@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const { Schema } = mongoose;
 
 const UserSchema = new Schema({
-  fullname: {
+  fullName: {
     type: String,
     trim: true,
     required: true
@@ -15,7 +15,7 @@ const UserSchema = new Schema({
     trime: true,
     require: true
   },
-  hash_password: {
+  hashPassword: {
     type: String,
     require: true
   },
@@ -26,7 +26,7 @@ const UserSchema = new Schema({
 });
 
 UserSchema.methods.comparePassword = function(password) {
-  return bcrypt.compareSync(password, this.hash_password);
+  return bcrypt.compareSync(password, this.hashPassword);
 };
 
 module.exports = mongoose.model('Users', UserSchema);
