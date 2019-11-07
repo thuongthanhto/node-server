@@ -1,13 +1,15 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const hbs = require('nodemailer-express-handlebars');
-
-const User = mongoose.model('Users');
-
-const email = process.env.MAILER_EMAIL_ID || 'auth_email_address@gmail.com';
-const pass = process.env.MAILER_PASSWORD || 'auth_email_pass';
+var mongoose = require('mongoose'),
+  jwt = require('jsonwebtoken'),
+  bcrypt = require('bcrypt'),
+  User = mongoose.model('Users'),
+  path = require('path'),
+  async = require('async'),
+  crypto = require('crypto'),
+  _ = require('lodash'),
+  hbs = require('nodemailer-express-handlebars'),
+  email = process.env.MAILER_EMAIL_ID || 'tothuongthanh@gmail.com',
+  pass = process.env.MAILER_PASSWORD || 'thuongkute',
+  nodemailer = require('nodemailer');
 
 var smtpTransport = nodemailer.createTransport({
   service: process.env.MAILER_SERVICE_PROVIDER || 'Gmail',
@@ -27,44 +29,49 @@ smtpTransport.use('compile', hbs(handlebarsOptions));
 
 exports.register = function(req, res) {
   var newUser = new User(req.body);
-  newUser.hashPassword = bcrypt.hashSync(req.body.password, 10);
+  newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
   newUser.save(function(err, user) {
     if (err) {
       return res.status(400).send({
         message: err
       });
     } else {
-      user.hashPassword = undefined;
+      user.hash_password = undefined;
       return res.json(user);
     }
   });
 };
 
-exports.login = function(req, res) {
+exports.index = function(req, res) {
+  return res.sendFile(path.resolve('./public/home.html'));
+};
+
+exports.render_forgot_password_template = function(req, res) {
+  return res.sendFile(path.resolve('./public/forgot-password.html'));
+};
+
+exports.render_reset_password_template = function(req, res) {
+  return res.sendFile(path.resolve('./public/reset-password.html'));
+};
+
+exports.sign_in = function(req, res) {
   User.findOne(
     {
       email: req.body.email
     },
     function(err, user) {
       if (err) throw err;
-      if (!user) {
-        res
-          .status(401)
-          .json({ message: 'Authentication failed. User not found.' });
-      } else if (user) {
-        if (!user.comparePassword(req.body.password)) {
-          res
-            .status(401)
-            .json({ message: 'Authentication failed. Wrong password.' });
-        } else {
-          return res.json({
-            token: jwt.sign(
-              { email: user.email, fullName: user.fullName, _id: user._id },
-              'RESTFULAPIs'
-            )
-          });
-        }
+      if (!user || !user.comparePassword(req.body.password)) {
+        return res.status(401).json({
+          message: 'Authentication failed. Invalid user or password.'
+        });
       }
+      return res.json({
+        token: jwt.sign(
+          { email: user.email, fullName: user.fullName, _id: user._id },
+          'RESTFULAPIs'
+        )
+      });
     }
   );
 };
@@ -139,6 +146,9 @@ exports.forgot_password = function(req, res) {
   );
 };
 
+/**
+ * Reset password
+ */
 exports.reset_password = function(req, res, next) {
   User.findOne({
     reset_password_token: req.body.token,

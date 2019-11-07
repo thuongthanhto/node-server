@@ -15,18 +15,24 @@ const UserSchema = new Schema({
     trime: true,
     require: true
   },
-  hashPassword: {
+  hash_password: {
     type: String,
     require: true
   },
   created: {
     type: Date,
     default: Date.now
+  },
+  reset_password_token: {
+    type: String
+  },
+  reset_password_expires: {
+    type: Date
   }
 });
 
 UserSchema.methods.comparePassword = function(password) {
-  return bcrypt.compareSync(password, this.hashPassword);
+  return bcrypt.compareSync(password, this.hash_password);
 };
 
 module.exports = mongoose.model('Users', UserSchema);

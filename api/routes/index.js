@@ -2,6 +2,8 @@ const todoList = require('../controllers/todoListController');
 const userHandlers = require('../controllers/userController');
 
 const routes = app => {
+  app.route('/').get(userHandlers.index);
+
   app
     .route('/tasks')
     .get(todoList.list_all_tasks)
@@ -15,7 +17,7 @@ const routes = app => {
 
   app.route('/auth/register').post(userHandlers.register);
 
-  app.route('/auth/login').post(userHandlers.login);
+  app.route('/auth/sign_in').post(userHandlers.sign_in);
 
   app
     .route('/auth/forgot_password')
