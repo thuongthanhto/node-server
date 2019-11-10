@@ -1,13 +1,13 @@
 const todoList = require('../controllers/todoListController');
-const userHandlers = require('../controllers/userController');
+const userController = require('../controllers/userController');
 
 const routes = app => {
-  app.route('/').get(userHandlers.index);
+  app.route('/').get(userController.index);
 
   app
     .route('/tasks')
     .get(todoList.list_all_tasks)
-    .post(userHandlers.loginRequired, todoList.create_a_task);
+    .post(userController.loginRequired, todoList.create_a_task);
 
   app
     .route('/tasks/:taskId')
@@ -15,19 +15,21 @@ const routes = app => {
     .put(todoList.update_a_task)
     .delete(todoList.delete_a_task);
 
-  app.route('/auth/register').post(userHandlers.register);
+  app.route('/api/users').get(userController.getAll);
 
-  app.route('/auth/sign_in').post(userHandlers.sign_in);
+  app.route('/auth/register').post(userController.register);
 
-  app
-    .route('/auth/forgot_password')
-    .get(userHandlers.render_forgot_password_template)
-    .post(userHandlers.forgot_password);
+  app.route('/auth/sign-in').post(userController.signIn);
 
   app
-    .route('/auth/reset_password')
-    .get(userHandlers.render_reset_password_template)
-    .post(userHandlers.reset_password);
+    .route('/auth/forgot-password')
+    .get(userController.renderForgotPasswordTemplate)
+    .post(userController.forgotPassword);
+
+  app
+    .route('/auth/reset-password')
+    .get(userController.renderResetPasswordTemplate)
+    .post(userController.resetPassword);
 };
 
 module.exports = routes;
