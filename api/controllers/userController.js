@@ -1,25 +1,27 @@
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const User = mongoose.model('Users');
-const async = require('async');
-const crypto = require('crypto');
-const _ = require('lodash');
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const async = require("async");
+const crypto = require("crypto");
+const _ = require("lodash");
+const path = require("path");
 
-const commonFunction = require('../helpers/commonFunc');
-const mailService = require('../services/mailService');
+const User = mongoose.model("Users");
+
+const commonFunction = require("../helpers/commonFunc");
+const mailService = require("../services/mailService");
 
 const userController = (function() {
   function index(res, res) {
-    return res.sendFile(path.resolve('./public/home.html'));
+    return res.sendFile(path.resolve("./public/home.html"));
   }
 
   function renderForgotPasswordTemplate(res, res) {
-    return res.sendFile(path.resolve('./public/forgot-password.html'));
+    return res.sendFile(path.resolve("./public/forgot-password.html"));
   }
 
   function renderResetPasswordTemplate(res, res) {
-    return res.sendFile(path.resolve('./public/reset-password.html'));
+    return res.sendFile(path.resolve("./public/reset-password.html"));
   }
 
   async function register(req, res) {
@@ -30,16 +32,17 @@ const userController = (function() {
       const user = await newUser.save();
       user.hash_password = undefined;
 
-      mailService.sendMail(
-        'register-success-email',
-        user.email,
-        'Register Success',
-        {
+      const data = {
+        template: "register-success-email",
+        to: user.email,
+        subject: "Register Success",
+        context: {
           name: user.fullName
         }
-      );
+      };
+      mailService.sendMail(data);
       return res.json(
-        commonFunction.generateSuccessObject(user, 'Create User Success!')
+        commonFunction.generateSuccessObject(user, "Create User Success!")
       );
     } catch (error) {
       console.log(error);
@@ -61,10 +64,10 @@ const userController = (function() {
           {
             token: jwt.sign(
               { email: user.email, fullName: user.fullName, _id: user._id },
-              'RESTFULAPIs'
+              "RESTFULAPIs"
             )
           },
-          'Login Success!'
+          "Login Success!"
         )
       );
     } catch (err) {
@@ -90,14 +93,14 @@ const userController = (function() {
             if (user) {
               done(err, user);
             } else {
-              done('User not found.');
+              done("User not found.");
             }
           });
         },
         function(user, done) {
           // create the random token
           crypto.randomBytes(20, function(err, buffer) {
-            var token = buffer.toString('hex');
+            var token = buffer.toString("hex");
             done(err, user, token);
           });
         },
@@ -114,25 +117,25 @@ const userController = (function() {
           });
         },
         function(token, user, done) {
-          // var data = {
-          //   to: user.email,
-          //   from: email,
-          //   template: 'forgot-password-email',
-          //   subject: 'Password help has arrived!',
-          //   context: {
-          //     url: 'http://localhost:3000/auth/reset_password?token=' + token,
-          //     name: user.fullName.split(' ')[0]
-          //   }
-          // };
-          // smtpTransport.sendMail(data, function(err) {
-          //   if (!err) {
-          //     return res.json({
-          //       message: 'Kindly check your email for further instructions'
-          //     });
-          //   } else {
-          //     return done(err);
-          //   }
-          // });
+          var data = {
+            to: user.email,
+            from: email,
+            template: "forgot-password-email",
+            subject: "Password help has arrived!",
+            context: {
+              url: "http://localhost:3000/auth/reset_password?token=" + token,
+              name: user.fullName.split(" ")[0]
+            }
+          };
+          mailService.sendMail(data, function(err) {
+            if (!err) {
+              return res.json({
+                message: "Kindly check your email for further instructions"
+              });
+            } else {
+              return done(err);
+            }
+          });
         }
       ],
       function(err) {
@@ -159,32 +162,32 @@ const userController = (function() {
                 message: err
               });
             } else {
-              // var data = {
-              //   to: user.email,
-              //   from: email,
-              //   template: 'reset-password-email',
-              //   subject: 'Password Reset Confirmation',
-              //   context: {
-              //     name: user.fullName.split(' ')[0]
-              //   }
-              // };
-              // smtpTransport.sendMail(data, function(err) {
-              //   if (!err) {
-              //     return res.json({ message: 'Password reset' });
-              //   } else {
-              //     return done(err);
-              //   }
-              // });
+              const data = {
+                to: user.email,
+                from: email,
+                template: "reset-password-email",
+                subject: "Password Reset Confirmation",
+                context: {
+                  name: user.fullName.split(" ")[0]
+                }
+              };
+              mailService.sendMail(data, function(err) {
+                if (!err) {
+                  return res.json({ message: "Password reset" });
+                } else {
+                  return done(err);
+                }
+              });
             }
           });
         } else {
           return res.status(422).send({
-            message: 'Passwords do not match'
+            message: "Passwords do not match"
           });
         }
       } else {
         return res.status(400).send({
-          message: 'Password reset token is invalid or has expired.'
+          message: "Password reset token is invalid or has expired."
         });
       }
     });
@@ -196,7 +199,7 @@ const userController = (function() {
 
       return res
         .status(200)
-        .json(commonFunction.generateSuccessObject(userList, 'Login Success!'));
+        .json(commonFunction.generateSuccessObject(userList, "Login Success!"));
     } catch (error) {
       console.log(error);
       res.status(500).json(commonFunction.generateErrorObject(1000));

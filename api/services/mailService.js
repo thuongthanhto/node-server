@@ -1,12 +1,12 @@
-const hbs = require('nodemailer-express-handlebars');
-const nodemailer = require('nodemailer');
-const path = require('path');
+const hbs = require("nodemailer-express-handlebars");
+const nodemailer = require("nodemailer");
+const path = require("path");
 
 const mailService = (function() {
-  const email = process.env.MAILER_EMAIL_ID || 'tothuongthanh@gmail.com';
-  const pass = process.env.MAILER_PASSWORD || 'thuongkute';
+  const email = process.env.MAILER_EMAIL_ID || "tothuongthanh@gmail.com";
+  const pass = process.env.MAILER_PASSWORD || "thuongkute";
   const smtpTransport = nodemailer.createTransport({
-    service: process.env.MAILER_SERVICE_PROVIDER || 'gmail',
+    service: process.env.MAILER_SERVICE_PROVIDER || "gmail",
     auth: {
       user: email,
       pass: pass
@@ -14,18 +14,18 @@ const mailService = (function() {
   });
   const handlebarsOptions = {
     viewEngine: {
-      extname: '.html',
-      layoutsDir: path.resolve('./api/templates/'),
-      defaultLayout: 'register-success-email',
-      partialsDir: path.resolve('./api/templates/')
+      extname: ".html",
+      layoutsDir: path.resolve("./api/templates/"),
+      defaultLayout: "register-success-email",
+      partialsDir: path.resolve("./api/templates/")
     },
-    viewPath: path.resolve('./api/templates/'),
-    extName: '.html'
+    viewPath: path.resolve("./api/templates/"),
+    extName: ".html"
   };
 
-  smtpTransport.use('compile', hbs(handlebarsOptions));
+  smtpTransport.use("compile", hbs(handlebarsOptions));
 
-  async function sendMail(template, to, subject, context) {
+  async function sendMail({ template, to, subject, context }) {
     try {
       const data = {
         to,
@@ -35,7 +35,9 @@ const mailService = (function() {
         context
       };
 
-      smtpTransport.sendMail(data);
+      const result = await smtpTransport.sendMail(data);
+
+      return result;
     } catch (error) {
       console.log(error);
       throw error;

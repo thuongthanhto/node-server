@@ -15,7 +15,9 @@ const routes = app => {
     .put(todoList.update_a_task)
     .delete(todoList.delete_a_task);
 
-  app.route('/api/users').get(userController.getAll);
+  app
+    .route('/api/users')
+    .get(userController.loginRequired, userController.getAll);
 
   app.route('/auth/register').post(userController.register);
 
