@@ -4,13 +4,16 @@ const port = process.env.PORT || 3000;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jsonwebtoken = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 require('./api/models/todoListModel');
 require('./api/models/userModel'); //created model loading here
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost/Tododb', {
+mongoose.connect(process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -28,9 +31,15 @@ app.use(function(req, res, next) {
   ) {
     jsonwebtoken.verify(
       req.headers.authorization.split(' ')[1],
-      'RESTFULAPIs',
+      process.env.SECRET_KEY,
       function(err, decode) {
-        if (err) req.user = undefined;
+        if (err) {
+          console.log(err);
+          req.user = undefined;
+          return res
+            .status(401)
+            .json({ error: true, message: 'Unauthorized access.' });
+        }
         req.user = decode;
         next();
       }
