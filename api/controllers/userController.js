@@ -224,15 +224,14 @@ const userController = (function() {
   async function extendToken(req, res) {
     try {
       const postData = req.body;
-
+      console.log(tokenList);
       if (postData.refreshToken && postData.refreshToken in tokenList) {
         const user = {
           email: postData.email,
-          fullName: postData.fullName,
-          _id: postData.userId
+          fullName: postData.fullName
         };
         const token = jwt.sign(user, process.env.SECRET_KEY, {
-          expiresIn: process.env.TOKEN_LIFE
+          expiresIn: config.tokenLife
         });
         const response = {
           token: token
@@ -258,7 +257,8 @@ const userController = (function() {
     loginRequired,
     forgotPassword,
     resetPassword,
-    getAll
+    getAll,
+    extendToken
   };
 })();
 

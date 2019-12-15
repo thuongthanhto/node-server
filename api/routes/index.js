@@ -22,6 +22,7 @@ const routes = app => {
   app.route('/auth/register').post(userController.register);
 
   app.route('/auth/sign-in').post(userController.signIn);
+  app.route('/auth/token').post(userController.extendToken);
 
   app
     .route('/auth/forgot-password')
