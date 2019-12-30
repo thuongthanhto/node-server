@@ -3,22 +3,17 @@ const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jsonwebtoken = require('jsonwebtoken');
-const dotenv = require('dotenv');
-
-dotenv.config();
+const config = require('./config/init');
 
 require('./api/models/todoListModel');
 require('./api/models/userModel'); //created model loading here
 
-// mongoose instance connection url connection
-mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+config.initializeDB();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(config.cors);
 
 app.use(express.static(__dirname + '/public'));
 
