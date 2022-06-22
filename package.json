@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/leonthuong/node-server#readme",
   "dependencies": {
-    "async": "^3.1.0",
+    "async": "^3.2.2",
     "bcrypt": "^3.0.6",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
